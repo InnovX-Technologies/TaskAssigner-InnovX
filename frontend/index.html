@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Assigner - Modern Task Management</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <!-- Header Section -->
+    <header class="app-header">
+      <div class="header-content">
+        <div class="header-left">
+          <h1><i class="fas fa-tasks"></i> Task Management System</h1>
+          <p class="app-subtitle">Enterprise Task Assignment & Tracking</p>
+        </div>
+        <div class="header-right">
+          <div class="header-info">
+            <span class="version-info">v2.1.0</span>
+            <span class="environment-info">Production</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Authentication Section -->
+    <div id="authSection" style="display: flex;flex-wrap: wrap;align-content: center;flex-direction: row-reverse;">
+      <div class="login-card">
+        <div class="login-prompt">
+            <h2>Welcome Back!</h2>
+            <p>Please log in to manage your tasks.</p>
+            <button onclick="showLoginModal()" class="submit-btn"><i class="fas fa-sign-in-alt"></i> Login</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Application Content (hidden by default) -->
+    <div id="mainAppContent" style="display: none;">
+      <!-- User Info and Actions -->
+      <div class="user-info-bar">
+        <div class="user-welcome">
+          <i class="fas fa-user-circle"></i>
+          <span id="userInfo">Welcome!</span>
+        </div>
+        <div class="user-actions">
+          <button id="manageUsersBtn" onclick="showUserManagementModal()" style="display: none;">
+            <i class="fas fa-users-cog"></i> Manage Users
+          </button>
+          <button id="logoutBtn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </div>
+      </div>
+
+      <!-- Notification Bell -->
+      <div class="notification-bar">
+        <div class="notification-bell" onclick="showNotificationsModal()">
+          <i class="fas fa-bell"></i>
+          <span class="notification-count" id="notificationCount">0</span>
+        </div>
+      </div>
+
+      <!-- Task Creation Form -->
+      <section class="task-section">
+        <h2><i class="fas fa-plus-circle"></i> Create New Task</h2>
+        <form id="taskForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="taskTitle"><i class="fas fa-heading"></i> Task Title</label>
+              <input type="text" id="taskTitle" placeholder="Enter task title" required>
+            </div>
+            <div class="form-group">
+              <label for="taskPriority"><i class="fas fa-exclamation-triangle"></i> Priority</label>
+              <select id="taskPriority" required>
+                <option value="">Select Priority</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="taskDescription"><i class="fas fa-align-left"></i> Description</label>
+              <textarea id="taskDescription" placeholder="Enter task description" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="taskDueDate"><i class="fas fa-calendar-alt"></i> Due Date</label>
+              <input type="date" id="taskDueDate" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="taskAssignee"><i class="fas fa-user"></i> Assign To</label>
+              <select id="taskAssignee" required>
+                <option value="">Select User</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="taskStatus"><i class="fas fa-toggle-on"></i> Status</label>
+              <select id="taskStatus" required>
+                <option value="pending">Pending</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="submit-btn">
+            <i class="fas fa-plus"></i> Create Task
+          </button>
+        </form>
+      </section>
+
+      <!-- Task Filters -->
+      <section class="filters-section">
+        <h2><i class="fas fa-filter"></i> Filter Tasks</h2>
+        <div id="taskFilters">
+          <div class="filter-group">
+            <label for="filterStatus"><i class="fas fa-toggle-on"></i> Status</label>
+            <select id="filterStatus">
+              <option value="">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filterPriority"><i class="fas fa-exclamation-triangle"></i> Priority</label>
+            <select id="filterPriority">
+              <option value="">All Priorities</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filterAssignee"><i class="fas fa-user"></i> Assignee</label>
+            <select id="filterAssignee">
+              <option value="">All Users</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filterDueDate"><i class="fas fa-calendar-alt"></i> Due Date</label>
+            <input type="date" id="filterDueDate">
+          </div>
+          <div class="filter-group">
+            <label for="searchTasks"><i class="fas fa-search"></i> Search</label>
+            <input type="text" id="searchTasks" placeholder="Search tasks...">
+          </div>
+          <button onclick="applyFilters()" class="filter-btn">
+            <i class="fas fa-search"></i> Apply Filters
+          </button>
+          <button onclick="clearFilters()" class="clear-btn">
+            <i class="fas fa-times"></i> Clear
+          </button>
+        </div>
+      </section>
+
+      <!-- Bulk Actions -->
+      <div id="bulkActionsBar" style="display: none;">
+        <span class="bulk-info">
+          <i class="fas fa-check-square"></i>
+          <span id="selectedCount">0</span> tasks selected
+        </span>
+        <select id="bulkAction">
+          <option value="">Select Action</option>
+          <option value="complete">Mark as Complete</option>
+          <option value="delete">Delete Selected</option>
+          <option value="assign">Reassign</option>
+        </select>
+        <button onclick="performBulkAction()" id="bulkActionBtn" disabled>
+          <i class="fas fa-play"></i> Apply
+        </button>
+        <button onclick="clearSelection()" class="clear-selection-btn">
+          <i class="fas fa-times"></i> Clear Selection
+        </button>
+      </div>
+
+      <!-- Task List -->
+      <section class="tasks-section">
+        <h2><i class="fas fa-list"></i> Task List</h2>
+        <div class="task-stats">
+          <div class="stat-item">
+            <i class="fas fa-clock"></i>
+            <span id="pendingCount">0</span> Pending
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-spinner"></i>
+            <span id="inProgressCount">0</span> In Progress
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-check-circle"></i>
+            <span id="completedCount">0</span> Completed
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="overdueCount">0</span> Overdue
+          </div>
+        </div>
+        <ul id="taskList"></ul>
+      </section>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-sign-in-alt"></i> Login</h3>
+        <span class="close" onclick="closeLoginModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="loginUsername"><i class="fas fa-user"></i> Username</label>
+            <input type="text" id="loginUsername" placeholder="Enter username" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword"><i class="fas fa-lock"></i> Password</label>
+            <input type="password" id="loginPassword" placeholder="Enter password" required>
+          </div>
+          <button type="submit" class="submit-btn">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </button>
+        </form>
+        <!-- <p>Don't have an account? <a href="#" onclick="showRegisterModal(); closeLoginModal()">Register here</a></p> -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div id="registerModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-plus"></i> Register</h3>
+        <span class="close" onclick="closeRegisterModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="registerUsername"><i class="fas fa-user"></i> Username</label>
+            <input type="text" id="registerUsername" placeholder="Enter username" required>
+          </div>
+          <div class="form-group">
+            <label for="registerEmail"><i class="fas fa-envelope"></i> Email</label>
+            <input type="email" id="registerEmail" placeholder="Enter email" required>
+          </div>
+          <div class="form-group">
+            <label for="registerPassword"><i class="fas fa-lock"></i> Password</label>
+            <input type="password" id="registerPassword" placeholder="Enter password" required>
+          </div>
+          <div class="form-group">
+            <label for="registerRole"><i class="fas fa-user-tag"></i> Role</label>
+            <select id="registerRole" required>
+              <option value="">Select Role</option>
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <button type="submit" class="submit-btn">
+            <i class="fas fa-user-plus"></i> Register
+          </button>
+        </form>
+        <p>Already have an account? <a href="#" onclick="showLoginModal(); closeRegisterModal()">Login here</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Task Edit Modal -->
+  <div id="editTaskModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-edit"></i> Edit Task</h3>
+        <span class="close" onclick="closeEditTaskModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="editTaskForm">
+          <input type="hidden" id="editTaskId">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editTaskTitle"><i class="fas fa-heading"></i> Task Title</label>
+              <input type="text" id="editTaskTitle" required>
+            </div>
+            <div class="form-group">
+              <label for="editTaskPriority"><i class="fas fa-exclamation-triangle"></i> Priority</label>
+              <select id="editTaskPriority" required>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editTaskDescription"><i class="fas fa-align-left"></i> Description</label>
+              <textarea id="editTaskDescription" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="editTaskDueDate"><i class="fas fa-calendar-alt"></i> Due Date</label>
+              <input type="date" id="editTaskDueDate" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editTaskAssignee"><i class="fas fa-user"></i> Assign To</label>
+              <select id="editTaskAssignee" required>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="editTaskStatus"><i class="fas fa-toggle-on"></i> Status</label>
+              <select id="editTaskStatus" required>
+                <option value="pending">Pending</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-actions">
+        <button type="submit" form="editTaskForm" class="submit-btn">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+        <button type="button" onclick="closeEditTaskModal()" class="cancel-btn">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comments Modal -->
+  <div id="commentsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-comments"></i> Task Comments</h3>
+        <span class="close" onclick="closeCommentsModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div id="commentsList"></div>
+        <form id="addCommentForm">
+          <input type="hidden" id="commentTaskId">
+          <div class="form-group">
+            <label for="commentText"><i class="fas fa-comment"></i> Add Comment</label>
+            <textarea id="commentText" placeholder="Enter your comment..." rows="3" required></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-actions">
+        <button type="submit" form="addCommentForm" class="submit-btn">
+          <i class="fas fa-plus"></i> Add Comment
+        </button>
+        <button type="button" onclick="closeCommentsModal()" class="cancel-btn">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notifications Modal -->
+  <div id="notificationsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-bell"></i> Notifications</h3>
+        <span class="close" onclick="closeNotificationsModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <ul id="notificationsList"></ul>
+      </div>
+      <div class="modal-actions">
+        <button onclick="markAllNotificationsAsRead()" class="submit-btn">
+          <i class="fas fa-check-double"></i> Mark All as Read
+        </button>
+        <button onclick="closeNotificationsModal()" class="cancel-btn">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Management Modal -->
+  <div id="userManagementModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-users-cog"></i> User Management</h3>
+        <span class="close" onclick="closeUserManagementModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div id="userSection">
+          <form id="userForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="userUsername"><i class="fas fa-user"></i> Username</label>
+                <input type="text" id="userUsername" placeholder="Enter username" required>
+              </div>
+              <div class="form-group">
+                <label for="userEmail"><i class="fas fa-envelope"></i> Email</label>
+                <input type="email" id="userEmail" placeholder="Enter email" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="userPassword"><i class="fas fa-lock"></i> Password</label>
+                <input type="password" id="userPassword" placeholder="Enter password" required>
+              </div>
+              <div class="form-group">
+                <label for="userRole"><i class="fas fa-user-tag"></i> Role</label>
+                <select id="userRole" required>
+                  <option value="">Select Role</option>
+                  <option value="user">Developer </option>
+                  <option value="manager">Manager</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </div>
+          </form>
+          <ul id="userList"></ul>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="submit" form="userForm" class="submit-btn">
+          <i class="fas fa-plus"></i> Add User
+        </button>
+        <button type="button" onclick="clearUserForm()" class="cancel-btn">
+          <i class="fas fa-eraser"></i> Clear
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
