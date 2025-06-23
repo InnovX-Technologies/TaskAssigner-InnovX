@@ -46,9 +46,3 @@ CREATE TABLE IF NOT EXISTS notifications (
   is_read BOOLEAN DEFAULT FALSE,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
--- Insert default admin user (password: admin123)
-INSERT INTO users (username, email, password, role) VALUES 
-('admin', 'admin@taskassigner.com', '$2b$10$rQZ8K9mN2pL1vX3yA6bC7.OQI4ZVgGxOPyVWWMLtMNJKoKJQU1vwO', 'admin');
-
- 
